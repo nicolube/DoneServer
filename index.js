@@ -87,7 +87,7 @@ function findPath(start, target) {
         const b = mapData[e]
         var d;
         var lp
-        for (p in a.connected) {
+        for (var p in a.connected) {
             const c = mapData[p];
             const cd = vector.distance(b, c);
             if (d == undefined || d > cd) {
@@ -115,7 +115,7 @@ function sleep(ms) {
 async function moveDrone(drone, target) {
     const start = drone.targetPoint;
     console.log(`${start} -> ${target}`)
-    path = findPath(start, target);
+    const path = findPath(start, target);
     drone.path = path["path"];
     var dist = mapData[start].connected[drone.path[0]]
     for (let i = 1; i < drone.path.length; i++) {
@@ -190,7 +190,7 @@ server.listen(port, function () {
 
 server.on('connection', function (socket) {
     console.log('A new connection has been established.');
-    socket.write(`return "$UUID:"..component.list("modem")()\n`)
+    socket.write(`return "$UUID:"..modemAddr\n`)
     var uuid = ""
     socket.on('data', function (chunk) {
         const data = chunk.toString();
@@ -266,12 +266,12 @@ const commands = {
         exe: (args) => {
             console.log("Connected drones: ")
             const connected = []
-            for (k in drones) if (drones[k].connected) connected.push(k)
+            for (var k in drones) if (drones[k].connected) connected.push(k)
             if (connected.length <= 0) {
                 console.log("No drones connected")
                 return
             }
-            for (i in connected) {
+            for (var i in connected) {
                 const uuid = connected[i]
                 console.log(`${uuid} -> ${drones[uuid].targetPoint}`)
             }
@@ -310,7 +310,7 @@ rl.on("line", (input) => {
                 break
             }
             console.error(); ("Drone not found")
-            for (k in drones) {
+            for (var k in drones) {
                 console.log(k)
             }
             break
@@ -343,11 +343,11 @@ rl.on("line", (input) => {
 
 [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `SIGTERM`].forEach((eventType) => {
     process.on(eventType, () => {
-        for (k in droneSockets) {
+        for (var k in droneSockets) {
             if (!droneSockets[k]) return
             droneSockets[k].end()
         }
-        for (k in drones) {
+        for (var k in drones) {
             drones[k].connected = false;
         }
         api.server.close();
