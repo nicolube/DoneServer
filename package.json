@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "map": "node mapProcessor.js",
+    "map": "node map/mapProcessor.js",
     "test": "node aStar.js"
   },
   "author": "",

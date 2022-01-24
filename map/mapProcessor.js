@@ -90,7 +90,7 @@ const commands = {
         description: "Loads a saved map.",
         syntax: "<name>",
         exe: (args) => {
-            const name = args[0].toLowerCase()+".json";
+            const name = args[0].toLowerCase() + ".json";
             if (!fs.existsSync(name)) {
                 console.error("File not found!")
                 return
@@ -102,7 +102,7 @@ const commands = {
         description: "Saves a map.",
         syntax: "<name>",
         exe: (args) => {
-            const name = args[0].toLowerCase()+".json";
+            const name = args[0].toLowerCase() + ".json";
             save(mapData, name)
         }
     },
@@ -110,7 +110,7 @@ const commands = {
         description: "Creates a new empty map.",
         exe: (args) => {
             mapData = {}
-            api.map = mapData;            
+            api.map = mapData;
         }
     },
     "add": {
@@ -133,11 +133,11 @@ const commands = {
         description: "Adds point to map.",
         syntax: "<jorny point>",
         exe: (args) => {
-            var data = args.join(" ").slice(1,-1).split(",")
+            var data = args.join(" ").slice(1, -1).split(",")
             console.log(data);
             for (let i = 0; i < data.length; i++) {
                 const rep = data[i].split(":")[0].replace(" ", "");
-                data[i] = data[i].replace(rep, `"${rep}"`) 
+                data[i] = data[i].replace(rep, `"${rep}"`)
             }
             data = JSON.parse(`{${data.join(",")}}`)
             mapData[data.name] = {
@@ -178,14 +178,21 @@ const commands = {
         exe: (args) => {
             const root = args.join(" ");
             const files = fs.readdirSync(root);
-            for (i in files) {
+            for (var i in files) {
                 const waypoint = JSON.parse(fs.readFileSync(path.join(root, files[i])));
-                mapData[waypoint.name] = {
-                    x: waypoint.x,
-                    y: waypoint.y,
-                    z: waypoint.z,
-                    connected: {}
+                if (waypoint.name in mapData) {
+                    mapData[waypoint.name].x = waypoint.x;
+                    mapData[waypoint.name].y = waypoint.y;
+                    mapData[waypoint.name].z = waypoint.z;
+                } else {
+                    mapData[waypoint.name] = {
+                        x: waypoint.x,
+                        y: waypoint.y,
+                        z: waypoint.z,
+                        connected: {}
+                    }
                 }
+
             }
         }
     },
