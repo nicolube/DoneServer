@@ -1,7 +1,7 @@
-const readline = require('readline');
-const fs = require('fs');
-const path = require('path');
-const api = require('../api')
+import readline from "readline"
+import fs from "fs"
+import * as api from "../api.js"
+import path from "path";
 
 var mapData = {};
 api.setMap(mapData);

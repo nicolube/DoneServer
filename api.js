@@ -1,5 +1,5 @@
-const express = require('express')
-const cors = require('cors');
+import express from "express"
+import cors from "cors"
 const app = express()
 app.use(cors());
 
@@ -8,10 +8,10 @@ const port = 3002
 var map = {};
 var drones = {};
 
-function setMap(_map) {
+export function setMap(_map) {
     map = _map;
 }
-function setDrones(_drones) {
+export function setDrones(_drones) {
     drones = _drones;
 }
 app.get('/', (req, res) => {
@@ -25,10 +25,6 @@ app.get('/drones', (req, res) => {
     res.send(drones)
 })
 
-const server = app.listen(port, () => {
+export const server = app.listen(port, () => {
     console.log(`API is listening on ${port}`)
 })
-
-exports.setMap = setMap;
-exports.setDrones = setDrones
-exports.server = server

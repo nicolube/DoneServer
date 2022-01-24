@@ -1,15 +1,15 @@
 // Include Nodejs' net module.
-const Net = require('net');
-const readline = require('readline');
-const fs = require('fs');
-const api = require('./api')
+import Net from "net"
+import readline from "readline"
+import fs from "fs"
+import * as api from "./api.js"
 
 /*
     File fuctions
 */
 function loadDoneFile() {
-    const drones = fs.readFileSync("drones.json");
-    for (k in drones) {
+    const drones = JSON.parse(fs.readFileSync("drones.json"));
+    for (var k in drones) {
         drones[k].connected = false;
     }
     return drones
@@ -21,7 +21,7 @@ function saveDroneFile() {
 
 var mapData = JSON.parse(fs.readFileSync("map.json"));
 
-var drones = JSON.parse(loadDoneFile());
+var drones = loadDoneFile();
 
 
 
@@ -62,6 +62,11 @@ const vector = {
         a.x = b.x;
         a.y = b.y;
         a.z = b.z;
+    },
+    round: (a, b) => {
+        a.x = Math.round(b.x);
+        a.y = Math.round(b.y);
+        a.z = Math.round(b.z);
     }
 }
 
@@ -127,28 +132,42 @@ setInterval(() => {
         if (!drone.connected) return;
         switch (drone.status) {
             case status.FINISHED_MOVE:
-                drone.point = drone.targetPoint;
-                if (drone.path.length == 0) {
-                    drone.status = status.IDLE;
-                    break
+                {
+                    drone.point = drone.targetPoint;
+                    vector.set(drone.lastLocation, mapData[drone.point])
+                    if (drone.path.length == 0) {
+                        drone.status = status.IDLE;
+                        break
+                    }
+                    drone.targetPoint = drone.path.shift();
+                    saveDroneFile()
+                    console.log("Move to: " + drone.targetPoint)
+                    const target = mapData[drone.targetPoint];
+                    const x = target.x - mapData[drone.point].x;
+                    const y = target.y - mapData[drone.point].y;
+                    const z = target.z - mapData[drone.point].z;
+                    drone.offset = 20
+                    droneSockets[uuid].write(`drone.move(${x}, ${y}, ${z})\n`);
+                    drone.status = status.MOVING
                 }
-                drone.targetPoint = drone.path.shift();
-                saveDroneFile()
-                console.log("Move to: " + drone.targetPoint)
-                const target = mapData[drone.targetPoint];
-                const x = target.x - mapData[drone.point].x;
-                const y = target.y - mapData[drone.point].y;
-                const z = target.z - mapData[drone.point].z;
-                drone.offset = 20
-                droneSockets[uuid].write(`drone.move(${x}, ${y}, ${z})\n`);
-                drone.status = status.MOVING
                 break
             case status.MOVING:
-                if (drone["offset"] > 0.8) {
-                    droneSockets[uuid].write(`return "$OFFSET:"..drone.getOffset()\n`)
+                {
+                    const target = mapData[drone.targetPoint];
+                    const a = drone.offset / target.connected[drone.point]
+                    const vect = vector.subtract(mapData[drone.point], target)
+                    vect.x *= a;
+                    vect.y *= a;
+                    vect.z *= a;
+                    const pos = vector.add(target, vect);
+                    vector.round(drone.lastLocation, pos)
+
+                    if (drone["offset"] > 0.8) {
+                        droneSockets[uuid].write(`return "$OFFSET:"..drone.getOffset()\n`)
+                    }
+                    else
+                        drone.status = status.FINISHED_MOVE
                 }
-                else
-                    drone.status = status.FINISHED_MOVE
                 break
             case status.IDLE:
                 break
