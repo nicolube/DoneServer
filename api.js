@@ -14,14 +14,12 @@ export function setMap(_map) {
 export function setDrones(_drones) {
     drones = _drones;
 }
-app.get('/', (req, res) => {
-    res.send("Hello world")
-})
+app.use('/', express.static('public'));
 
-app.get('/map', (req, res) => {
+app.get('/api/map', (req, res) => {
     res.send(map)
 })
-app.get('/drones', (req, res) => {
+app.get('/api/drones', (req, res) => {
     res.send(drones)
 })
 
