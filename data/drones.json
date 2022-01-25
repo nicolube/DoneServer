@@ -9,7 +9,7 @@
       "z": -891
     },
     "offset": 0.1250764876604,
-    "energy": 1,
+    "energy": 0.999,
     "path": [],
     "status": 0
   },
@@ -22,8 +22,8 @@
       "y": 71,
       "z": -1169
     },
-    "offset": 0.415436565876,
-    "energy": 1,
+    "offset": 0.06735217571258,
+    "energy": 0.999,
     "path": [],
     "status": 0
   },
@@ -37,7 +37,7 @@
       "z": -891
     },
     "offset": 0.0805695280432,
-    "energy": 1,
+    "energy": 0.999,
     "path": [],
     "status": 0
   },
@@ -51,7 +51,7 @@
       "z": -891
     },
     "offset": 0.1942903101444,
-    "energy": 1,
+    "energy": 0.999,
     "path": [],
     "status": 0
   },
@@ -64,21 +64,21 @@
       "y": 75,
       "z": -891
     },
-    "offset": 0.1294436007738,
-    "energy": 1,
+    "offset": 0.0805695280432,
+    "energy": 0.999,
     "path": [],
     "status": 0
   },
   "ca7588f6-775c-4c61-ad72-9253c2a4199": {
     "connected": false,
-    "point": "dev-dev",
+    "point": "rimuru-dev",
     "targetPoint": "rimuru-dev",
     "lastLocation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
+      "x": 347,
+      "y": 71,
+      "z": -1169
     },
-    "offset": 0,
+    "offset": 0.06735217571258,
     "energy": 1,
     "path": [],
     "status": 0
@@ -88,11 +88,11 @@
     "point": "rimuru-dev",
     "targetPoint": "rimuru-dev",
     "lastLocation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
+      "x": 347,
+      "y": 71,
+      "z": -1169
     },
-    "offset": 0,
+    "offset": 0.4154331386089,
     "energy": 1,
     "path": [],
     "status": 0
