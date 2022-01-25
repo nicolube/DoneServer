@@ -5,7 +5,7 @@ export const aStar = (mapData, start, end) => {
     var open = new MinQueue()
     var closed = []
     var data = []
-    const run = (parent, end) => {
+    const run = (parent) => {
         const endPoint = mapData[end]
         while (true) {
             var parentPoint = mapData[parent.name];
@@ -22,7 +22,7 @@ export const aStar = (mapData, start, end) => {
                 selData.id = data.push(selData) - 1;
                 open.push(selData.id, vector.distance(selPoint, endPoint) + selData.distance);
             }
-            if (open.size <= 0) return "Fail"
+            if (open.size <= 0) throw Error(`No path found from ${start} to ${end}`)
             parent = data[open.pop()];
             closed.push(parent.name);
         }
@@ -36,7 +36,7 @@ export const aStar = (mapData, start, end) => {
     };
     closed.push(start);
     data.push(startData)
-    var r = run(startData, end)
+    var r = run(startData)
     const distance = r.distance
     const result = []
     while (r) {
