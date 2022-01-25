@@ -127,9 +127,12 @@ function windowResized() {
 
 function mouseWheel(event) {
   var scale = s;
-  scale += event.delta * .005;
-  if (scale > 3) scale = 3;
-  if (scale < 0.2) scale = 0.2
+  if (event.delta > 0)
+    scale *= .95;
+  else 
+    scale *= 1.05;
+  if (scale > 5) scale = 5;
+  if (scale < 0.1) scale = 0.1;
   s = scale
   m = picWith * scale;
   cols = windowWidth / m

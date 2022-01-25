@@ -1,29 +1,14 @@
 // Include Nodejs' net module.
 import Net from "net"
 import readline from "readline"
-import fs from "fs"
+import fs, { rmSync } from "fs"
 import * as api from "./api.js"
+import { calcDronePosition, loadDoneFile, loadMapData, saveDroneFile, vector } from "./lib.js";
+import { aStar } from "./aStar.js";
 
-/*
-    File fuctions
-*/
-function loadDoneFile() {
-    const drones = JSON.parse(fs.readFileSync("drones.json"));
-    for (var k in drones) {
-        drones[k].connected = false;
-    }
-    return drones
-}
-
-function saveDroneFile() {
-    fs.writeFileSync("drones.json", JSON.stringify(drones, null, 2))
-}
-
-var mapData = JSON.parse(fs.readFileSync("map.json"));
+var mapData = loadMapData();
 
 var drones = loadDoneFile();
-
-
 
 var droneSockets = {}
 
@@ -36,80 +21,10 @@ const status = {
     FINISHED_MOVE: 2,
 }
 
-const vector = {
-
-    distance: (a, b) => {
-        const c = vector.subtract(a, b);
-        return Math.sqrt(c.x * c.x + c.y * c.y + c.z * c.z)
-    },
-
-    add: (a, b) => {
-        return {
-            x: (a.x + b.x),
-            y: (a.y + b.y),
-            z: (a.z + b.z),
-        };
-    },
-
-    subtract: (a, b) => {
-        return {
-            x: (a.x - b.x),
-            y: (a.y - b.y),
-            z: (a.z - b.z),
-        };
-    },
-    set: (a, b) => {
-        a.x = b.x;
-        a.y = b.y;
-        a.z = b.z;
-    },
-    round: (a, b) => {
-        a.x = Math.round(b.x);
-        a.y = Math.round(b.y);
-        a.z = Math.round(b.z);
-    }
-}
-
-
-
 function findPath(start, target) {
-    var dist = 0
-    var visited = []
-    var stack = []
-    function find(s, e) {
-        visited.push(s)
-        if (s == e) {
-            stack.push(e);
-            stack.shift();
-            return stack
-        }
-        const a = mapData[s]
-        const b = mapData[e]
-        var d;
-        var lp
-        for (var p in a.connected) {
-            const c = mapData[p];
-            const cd = vector.distance(b, c);
-            if (d == undefined || d > cd) {
-                if (!visited.includes(p)) {
-                    d = cd;
-                    lp = p;
-                }
-            }
-        }
-        if (d == undefined)
-            return find(stack.pop(), e)
-        stack.push(s);
-        return find(lp, e)
-    }
-    return {
-        path: find(start, target),
-        distance: dist
-    }
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    const result = aStar(mapData, start, target)
+    result.path.pop()
+    return result
 }
 
 async function moveDrone(drone, target) {
@@ -117,15 +32,14 @@ async function moveDrone(drone, target) {
     console.log(`${start} -> ${target}`)
     const path = findPath(start, target);
     drone.path = path["path"];
-    var dist = mapData[start].connected[drone.path[0]]
-    for (let i = 1; i < drone.path.length; i++) {
-        const p = drone.path[i];
-        dist += mapData[drone.path[i]].connected[drone.path[i - 1]]
-    }
-    console.log(`Drone moves to ${target} -> ${dist.toFixed(2)}m`)
+    console.log(`Drone moves to ${target} -> ${path.distance.toFixed(2)}m`)
     if (drone.status == status.IDLE)
         drone.status = status.FINISHED_MOVE
 }
+
+/**
+ * Fast scheduler for robots and drones
+ */
 
 setInterval(() => {
     for (const [uuid, drone] of Object.entries(drones)) {
@@ -139,9 +53,8 @@ setInterval(() => {
                         drone.status = status.IDLE;
                         break
                     }
-                    drone.targetPoint = drone.path.shift();
-                    saveDroneFile()
-                    console.log("Move to: " + drone.targetPoint)
+                    drone.targetPoint = drone.path.pop();
+                    saveDroneFile(drones)
                     const target = mapData[drone.targetPoint];
                     const x = target.x - mapData[drone.point].x;
                     const y = target.y - mapData[drone.point].y;
@@ -153,15 +66,6 @@ setInterval(() => {
                 break
             case status.MOVING:
                 {
-                    const target = mapData[drone.targetPoint];
-                    const a = drone.offset / target.connected[drone.point]
-                    const vect = vector.subtract(mapData[drone.point], target)
-                    vect.x *= a;
-                    vect.y *= a;
-                    vect.z *= a;
-                    const pos = vector.add(target, vect);
-                    vector.round(drone.lastLocation, pos)
-
                     if (drone["offset"] > 0.8) {
                         droneSockets[uuid].write(`return "$OFFSET:"..drone.getOffset()\n`)
                     }
@@ -175,12 +79,20 @@ setInterval(() => {
     };
 }, 1000)
 
+/**
+ * Slow scheduler for robots and drones
+ */
+
 setInterval(() => {
     for (const [uuid, drone] of Object.entries(drones)) {
         if (!drone.connected) return;
         droneSockets[uuid].write(`return "$ENERGY:"..computer.energy()/computer.maxEnergy()\n`)
     };
 }, 5000)
+
+/**
+ * TCP Sever for Robots and drones
+ */
 
 const server = new Net.Server();
 const port = 8080;
@@ -221,14 +133,13 @@ server.on('connection', function (socket) {
         }
         if (data.startsWith("$OFFSET:") && drones[uuid].status == status.MOVING) {
             drones[uuid].offset = parseFloat(data.substring(8, data.length - 1))
+            drones[uuid].lastLocation = calcDronePosition(mapData, drones[uuid])
             return
         }
         if (data.startsWith("$ENERGY:")) {
             drones[uuid].energy = parseFloat(data.substring(8, data.length - 1))
             return
         }
-        if (uuid == sel)
-            console.log(data)
     });
 
     socket.on('end', function () {
@@ -353,7 +264,7 @@ rl.on("line", (input) => {
         api.server.close();
         server.close();
         console.log("Exit " + eventType);
-        saveDroneFile()
+        saveDroneFile(drones)
         process.exit();
     });
 });

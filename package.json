@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "map": "node map/mapProcessor.js",
-    "test": "node aStar.js"
+    "start": "node src/index.js",
+    "map": "node src/map/mapProcessor.js",
+    "test": "node src/aStar.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,29 +1,23 @@
 import readline from "readline"
 import fs from "fs"
-import * as api from "../api.js"
 import path from "path";
+import * as api from "../api.js"
+import { fileExists, loadMapData, saveMapData, vector } from "../lib.js";
 
 var mapData = {};
 api.setMap(mapData);
 
-function distance(a, b) {
-    const x = a["x"] - b["x"];
-    const y = a["y"] - b["y"];
-    const z = a["z"] - b["z"];
-    return Math.sqrt(x * x + y * y + z * z)
-}
-
 function validate(mapData) {
     console.log("Validate points...")
-    for (p in mapData) {
+    for (var p in mapData) {
         var data = mapData[p]
 
-        for (op in data["connected"]) {
+        for (var op in data.connected) {
             if (!(op in mapData)) {
                 console.error(`Point ${op} not found`)
                 return
             }
-            if (!(p in mapData[op]["connected"])) {
+            if (!(p in mapData[op].connected)) {
                 console.error(`${p} not in ${op}`)
                 return
             }
@@ -38,8 +32,8 @@ function calcDistances(mapData) {
     for (p in mapData) {
         var data = mapData[p]
 
-        for (op in data["connected"]) {
-            data["connected"][op] = distance(data, mapData[op])
+        for (op in data.connected) {
+            data.connected[op] = vector.distance(data, mapData[op])
         }
     }
 }
@@ -47,38 +41,28 @@ function calcDistances(mapData) {
 function connect(mapData, p1, p2) {
     const a = mapData[p1];
     const b = mapData[p2];
-    const d = distance(a, b)
-    a["connected"][p2] = d;
-    b["connected"][p1] = d;
+    const d = vector.distance(a, b)
+    a.connected[p2] = d;
+    b.connected[p1] = d;
 }
 
 function disconnect(mapData, p1, p2) {
     const a = mapData[p1];
     const b = mapData[p2];
-    delete a["connected"][p2];
-    delete b["connected"][p1];
+    delete a.connected[p2];
+    delete b.connected[p1];
 }
 
 function deletePoint(mapData, p) {
     const a = mapData[p];
-    for (op in a["connected"]) {
-        delete mapData[op]["connected"][p]
+    for (op in a.connected) {
+        delete mapData[op].connected[p]
     }
     delete mapData[p]
 }
-
-function load(name) {
-    mapData = JSON.parse(fs.readFileSync(name))
-    api.setMap(mapData);
-}
-
-function save(mapData, name) {
-    fs.writeFileSync(name, JSON.stringify(mapData, null, 2))
-}
-
 function logHelp(cmd) {
-    const syntax = commands[cmd]["syntax"];
-    const description = commands[cmd]["description"];
+    const syntax = commands[cmd].syntax;
+    const description = commands[cmd].description;
     if (syntax == null)
         console.log(`${cmd} | ${description}`)
     else
@@ -91,11 +75,12 @@ const commands = {
         syntax: "<name>",
         exe: (args) => {
             const name = args[0].toLowerCase() + ".json";
-            if (!fs.existsSync(name)) {
+            if (!fileExists(name)) {
                 console.error("File not found!")
                 return
             }
-            load(name)
+            mapData = loadMapData(name)
+            api.setMap(mapData)
         }
     },
     "save": {
@@ -103,7 +88,7 @@ const commands = {
         syntax: "<name>",
         exe: (args) => {
             const name = args[0].toLowerCase() + ".json";
-            save(mapData, name)
+            saveMapData(mapData, name)
         }
     },
     "new": {
