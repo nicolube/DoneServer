@@ -6,13 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "map": "node src/map/mapProcessor.js",
-    "test": "node src/aStar.js"
+    "map": "node src/map/mapProcessor.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.17.2",
     "heapify": "^0.6.0",
     "prompt": "^1.2.1",
