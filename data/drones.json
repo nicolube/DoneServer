@@ -1,6 +1,6 @@
 {
   "168ea72e-a37e-4a9c-8182-8606f57d0de": {
-    "connected": true,
+    "connected": false,
     "point": "watame-tco-dev",
     "targetPoint": "watame-tco-dev",
     "lastLocation": {
@@ -14,7 +14,7 @@
     "status": 0
   },
   "93e14e94-50ca-4da4-a5ac-1866d4036c9": {
-    "connected": true,
+    "connected": false,
     "point": "rimuru-dev",
     "targetPoint": "rimuru-dev",
     "lastLocation": {
@@ -22,13 +22,13 @@
       "y": 71,
       "z": -1169
     },
-    "offset": 0.06735217571258,
+    "offset": 0.415436565876,
     "energy": 1,
     "path": [],
     "status": 0
   },
   "78c07ac5-c38d-4505-8a27-7f1257d5dda": {
-    "connected": true,
+    "connected": false,
     "point": "watame-tco-dev",
     "targetPoint": "watame-tco-dev",
     "lastLocation": {
@@ -42,29 +42,57 @@
     "status": 0
   },
   "378d5871-bd4c-46db-8a59-3bdde5b0421": {
-    "connected": true,
-    "point": "watame-tco-dev-p01",
+    "connected": false,
+    "point": "watame-tco-dev",
     "targetPoint": "watame-tco-dev",
     "lastLocation": {
       "x": -642,
-      "y": 79,
+      "y": 75,
       "z": -891
     },
     "offset": 0.1942903101444,
-    "energy": 0.3686799999999,
+    "energy": 1,
     "path": [],
-    "status": 2
+    "status": 0
   },
   "4f2f46c7-7693-4a41-b4c4-ca52a9f80f3": {
-    "connected": true,
+    "connected": false,
+    "point": "watame-tco-dev",
+    "targetPoint": "watame-tco-dev",
+    "lastLocation": {
+      "x": -642,
+      "y": 75,
+      "z": -891
+    },
+    "offset": 0.1294436007738,
+    "energy": 1,
+    "path": [],
+    "status": 0
+  },
+  "ca7588f6-775c-4c61-ad72-9253c2a4199": {
+    "connected": false,
+    "point": "dev-dev",
+    "targetPoint": "rimuru-dev",
+    "lastLocation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "offset": 0,
+    "energy": 1,
+    "path": [],
+    "status": 0
+  },
+  "b35eb7cb-8523-4eb6-a61b-ecd2395d514": {
+    "connected": false,
     "point": "rimuru-dev",
     "targetPoint": "rimuru-dev",
     "lastLocation": {
-      "x": 347,
-      "y": 71,
-      "z": -1169
+      "x": 0,
+      "y": 0,
+      "z": 0
     },
-    "offset": 0.376236677169,
+    "offset": 0,
     "energy": 1,
     "path": [],
     "status": 0

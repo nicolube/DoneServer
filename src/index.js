@@ -3,7 +3,7 @@ import Net from "net"
 import readline from "readline"
 import fs from "fs"
 import * as api from "./api.js"
-import { calcDronePosition, loadDoneFile, loadMapData, saveDroneFile, vector } from "./lib.js";
+import { calcDronePosition, fileExists, loadDoneFile, loadMapData, saveDroneFile, vector } from "./lib.js";
 import { aStar } from "./aStar.js";
 
 var mapData = loadMapData();
@@ -31,7 +31,6 @@ async function moveDrone(drone, target) {
     const start = drone.targetPoint;
     console.log(`${start} -> ${target}`)
     const path = findPath(start, target);
-    console.log(path);
     drone.path = path["path"];
     console.log(`Drone moves to ${target} -> ${path.distance.toFixed(2)}m`)
     if (drone.status == status.IDLE)
@@ -116,8 +115,8 @@ server.on('connection', function (socket) {
             } else {
                 drones[uuid] = {
                     connected: true,
-                    point: "dev-dev",
-                    targetPoint: "dev-dev",
+                    point: "rimuru-dev",
+                    targetPoint: "rimuru-dev",
                     lastLocation: {
                         x: 0,
                         y: 0,
@@ -140,6 +139,9 @@ server.on('connection', function (socket) {
         if (data.startsWith("$ENERGY:")) {
             drones[uuid].energy = parseFloat(data.substring(8, data.length - 1))
             return
+        }
+        if (data != "nil" && uuid == sel) {
+            console.log(data);
         }
     });
 
@@ -167,14 +169,16 @@ const commands = {
         syntax: "<name>",
         exe: (args) => {
             const name = args[0].toLowerCase() + ".json";
-            if (!fs.existsSync(name)) {
+            if (!fileExists(name)) {
                 console.error("File not found!")
                 return
             }
-            load(name)
+            mapData = loadMapData(name)
+            api.setMap(mapData)
         }
     },
     list: {
+        description: "List all connected drones",
         exe: (args) => {
             console.log("Connected drones: ")
             const connected = []
@@ -188,7 +192,106 @@ const commands = {
                 console.log(`${uuid} -> ${drones[uuid].targetPoint}`)
             }
         }
+    },
+    sel: {
+        description: "Select and drone.",
+        syntax: "<uuid>",
+        exe: (args) => {
+            if (args[0] in drones) {
+                sel = args[0]
+                console.log(`Drone ${sel} selceted!`)
+                return
+            }
+            console.error(); ("Drone not found")
+            for (var k in drones) {
+                console.log(k)
+            }
+        }
+    },
+    unsel: {
+        description: "Unselect a drone.",
+        exe: (args) => {
+            console.log(`Drone ${sel} unselected.`)
+            sel = ""
+        }
+    },
+    setpoint: {
+        description: "Set the current point of an drone.",
+        exe: (args) => {
+            if (drones[sel] == null) {
+                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
+                return
+            }
+            const point = args[0].toLowerCase()
+            if (!(point in mapData)) {
+                console.error(`Taget point ${point} not found!`);
+                return
+            }
+            drones[sel].targetPoint = point;
+            drones[sel].point = point;
+        }
+    },
+    exe: {
+        description: "Execute lua code on seldected drone.",
+        syntax: "<lua code>",
+        exe: (args) => {
+            const exe = args.join(" ")
+            if (drones[sel] == null) {
+                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
+                return
+            }
+            droneSockets[sel].write(exe + "\n")
+            console.log("exe: " + exe)
+        }
+    },
+    move: {
+        exe: (args) => {
+            const point = args[0].toLowerCase()
+            if (!(point in mapData)) {
+                console.error(`Taget point ${point} not found!`);
+                return
+            }
+            if (drones[sel] == null) {
+                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
+                return
+            }
+            moveDrone(drones[sel], point)
+        }
+    },
+    move: {
+        exe: (args) => {
+            const point = args[0].toLowerCase()
+            if (!(point in mapData)) {
+                console.error(`Taget point ${point} not found!`);
+                return
+            }
+            if (drones[sel] == null) {
+                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
+                return
+            }
+            moveDrone(drones[sel], point)
+        }
+    },
+    offset: {
+
+        exe: (args) => {
+            if (drones[sel] == null) {
+                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
+                return
+            }
+            console.log("Drone offset: " + drones[sel].offset);
+        }
     }
+
+}
+
+function logHelp(cmd) {
+    const syntax = commands[cmd].syntax;
+    const description = commands[cmd].description;
+    if (syntax == null)
+        console.log(`${cmd} | ${description}`)
+    else
+        console.log(`${cmd} ${syntax} | ${description}`)
 }
 
 const rl = readline.createInterface({
@@ -200,7 +303,7 @@ rl.on("line", (input) => {
     const cmd = args.shift().toLowerCase();
 
     if (cmd in commands) {
-        if (commands[cmd].syntax != null && args.length < commands[cmd].syntax.split(" ").length) {
+        if (commands[cmd].syntax != null && args.length < commands[cmd].syntax.match(/[<>]/g).length/2) {
             console.log("Invalid syntax")
             logHelp(cmd)
             return
@@ -213,59 +316,22 @@ rl.on("line", (input) => {
         return
     }
     console.log(`Command not found fly "help" for cmd list`);
+});
 
-    switch (cmd) {
-        case "sel":
-            if (args[0] in drones) {
-                sel = args[0]
-                console.log(`Drone ${sel} selceted!`)
-                break
+
+    [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `SIGTERM`].forEach((eventType) => {
+        process.on(eventType, () => {
+            for (var k in droneSockets) {
+                if (!droneSockets[k]) return
+                droneSockets[k].end()
             }
-            console.error(); ("Drone not found")
             for (var k in drones) {
-                console.log(k)
+                drones[k].connected = false;
             }
-            break
-        case "exe":
-            const exe = args.join(" ")
-            if (drones[sel] == null) {
-                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
-                break
-            }
-            droneSockets[sel].write(exe + "\n")
-            console.log("exe: " + exe)
-            break
-        case "move":
-            const point = args[0].toLowerCase()
-            if (!(point in mapData)) {
-                console.error(`Taget point ${point} not found!`);
-                break
-            }
-            if (drones[sel] == null) {
-                console.error(`Cannot execute on ${sel} try "list" / "sel <uuid>"`)
-                break
-            }
-            moveDrone(drones[sel], point)
-            break
-        case "offset":
-            console.log("Drone offset: " + drones[sel].offset);
-            break
-    }
-});
-
-[`SIGINT`, `SIGUSR1`, `SIGUSR2`, `SIGTERM`].forEach((eventType) => {
-    process.on(eventType, () => {
-        for (var k in droneSockets) {
-            if (!droneSockets[k]) return
-            droneSockets[k].end()
-        }
-        for (var k in drones) {
-            drones[k].connected = false;
-        }
-        api.server.close();
-        server.close();
-        console.log("Exit " + eventType);
-        saveDroneFile(drones)
-        process.exit();
+            api.server.close();
+            server.close();
+            console.log("Exit " + eventType);
+            saveDroneFile(drones)
+            process.exit();
+        });
     });
-});
