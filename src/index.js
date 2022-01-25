@@ -1,7 +1,7 @@
 // Include Nodejs' net module.
 import Net from "net"
 import readline from "readline"
-import fs, { rmSync } from "fs"
+import fs from "fs"
 import * as api from "./api.js"
 import { calcDronePosition, loadDoneFile, loadMapData, saveDroneFile, vector } from "./lib.js";
 import { aStar } from "./aStar.js";
@@ -31,6 +31,7 @@ async function moveDrone(drone, target) {
     const start = drone.targetPoint;
     console.log(`${start} -> ${target}`)
     const path = findPath(start, target);
+    console.log(path);
     drone.path = path["path"];
     console.log(`Drone moves to ${target} -> ${path.distance.toFixed(2)}m`)
     if (drone.status == status.IDLE)
