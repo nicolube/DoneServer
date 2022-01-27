@@ -206,9 +206,8 @@ export class DroneMap extends Map {
 
     constructor(props) {
         super(props)
-        this.show = props.show;
-        if (this.show === undefined) this.show = "address"
-        this.data = {}
+        this.props = props;
+        this.data = {};
         this.updateData();
         setInterval(() => this.updateData(), 1000);
     }
@@ -272,11 +271,13 @@ export class DroneMap extends Map {
             p5.pop();
             // Move halfway again
             arclength += w * wm;
-        }
+        }list
     }
 
     draw = (p5) => {
         this.drawMap(p5);
+        this.show = this.props.show;
+        if (this.show === undefined) this.show = "address"
         var s = this.s;
         if (!this.data.map) return
         p5.stroke(155, 0, 155)
