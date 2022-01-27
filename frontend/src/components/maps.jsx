@@ -101,6 +101,26 @@ export default class Map extends React.Component {
 
     setup = async (p5_, parent_) => this.setupMap(p5_, parent_);
 
+    handleMove = (e) => {
+        e.preventDefault()
+        const p5 = this.p5;
+        const s = this.s
+        this.mousePos = { x: p5.mouseX / s, z: p5.mouseY / s }
+        if (this.reset) {
+            this.reset = false
+            this.startMousePos = this.mousePos
+            this.smPos = this.mousePos;
+        }
+        if (p5.mouseIsPressed) {
+            if (e.type === "touchmove")
+                this.mPos = vector.add(this.smPos, vector.subtract(this.startMousePos, this.mousePos))
+            else
+                this.mPos = vector.subtract(this.mPos, { x: e.movementX / s, z: e.movementY / s })
+            this.saveCookies()
+        }
+        return false
+    }
+
     setupMap = async (p5_, parent_) => {
         this.p5 = p5_;
         this.parent = parent_;
@@ -115,11 +135,10 @@ export default class Map extends React.Component {
         this.imgIndex = await (await fetch(`${config.apiURL}/assets/img/map/index`)).json()
 
         this.updateSize();
-        this.oldMousePos = { x: this.p5.mouseX, z: this.p5.mouseY }
         var cnv = this.p5.createCanvas(this.w, this.h).parent(parent_);
 
         // Add UI
-        
+
 
         var button = p5_.createButton("Reset position")
         button.mousePressed(this.resetPosition);
@@ -140,14 +159,11 @@ export default class Map extends React.Component {
             event.preventDefault()
         });
 
-        cnv.mouseMoved((e) => {
-            this.mousePos = { x: this.p5.mouseX / this.s, z: this.p5.mouseY / this.s }
-            if (this.p5.mouseIsPressed) {
-                this.mPos = vector.subtract(this.mPos, vector.subtract(this.mousePos, this.oldMousePos))
-                this.saveCookies()
-            }
-            this.oldMousePos = this.mousePos;
-        })
+        cnv.mouseMoved((e) => this.handleMove(e))
+        cnv.touchMoved((e) => this.handleMove(e))
+        cnv.touchEnded((e) => {
+            this.reset = true;
+        });
 
         new ResizeObserver(() => {
             this.updateSize()
