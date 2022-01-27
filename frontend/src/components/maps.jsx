@@ -131,7 +131,7 @@ export default class Map extends React.Component {
             else
                 this.s *= 1.05;
             if (this.s > 10) this.s = 10;
-            if (this.s < 0.1) this.s = 0.1;
+            if (this.s < 0.5) this.s = 0.5;
             this.updateSize()
             this.saveCookies();
         });
@@ -154,6 +154,7 @@ export default class Map extends React.Component {
             const rect = getOffset(this.parent)
             button.position(rect.x + this.w - button.width, rect.y)
         }).observe(parent_)
+
     };
 
     drawMap = (p5) => {
@@ -176,6 +177,7 @@ export default class Map extends React.Component {
 
         // Draw map
         p5.imageMode(p5.CORNER);
+        p5.noSmooth();
         var imgPos = { x: this.p5.floor(this.mPos.x / 512), z: this.p5.floor(this.mPos.z / 512) };
         var offset = {
             x: this.sPos.x + imgPos.x * sPicSize,
@@ -193,6 +195,7 @@ export default class Map extends React.Component {
                 }
             }
         }
+        p5.smooth();
     };
 
     draw = (p5) => this.drawMap(p5);
@@ -309,9 +312,9 @@ export class DroneMap extends Map {
         for (var uuid in this.data.drones) {
             const drone = this.data.drones[uuid];
             const dPos = this.pos2Canvers(drone.lastLocation)
-            p5.ellipse(dPos.x, dPos.z, 28 * s, 28 * s)
+            p5.ellipse(dPos.x, dPos.z, 20 * s)
             p5.imageMode(p5.CENTER);
-            p5.image(this.droneImg, dPos.x, dPos.z, 20 * s, 20 * s)
+            p5.image(this.droneImg, dPos.x, dPos.z, 15 * s, 15 * s)
         }
     }
 }
