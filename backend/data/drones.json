@@ -9,7 +9,7 @@
       "z": -891
     },
     "offset": 0.1250764876604,
-    "energy": 0.999,
+    "energy": 1,
     "path": [],
     "status": 0
   },
@@ -23,7 +23,7 @@
       "z": -1169
     },
     "offset": 0.06735217571258,
-    "energy": 0.999,
+    "energy": 1,
     "path": [],
     "status": 0
   },
@@ -37,7 +37,7 @@
       "z": -891
     },
     "offset": 0.0805695280432,
-    "energy": 0.999,
+    "energy": 1,
     "path": [],
     "status": 0
   },
@@ -51,7 +51,7 @@
       "z": -891
     },
     "offset": 0.1942903101444,
-    "energy": 0.999,
+    "energy": 1,
     "path": [],
     "status": 0
   },
@@ -65,20 +65,20 @@
       "z": -891
     },
     "offset": 0.0805695280432,
-    "energy": 0.999,
+    "energy": 1,
     "path": [],
     "status": 0
   },
   "ca7588f6-775c-4c61-ad72-9253c2a4199": {
     "connected": false,
-    "point": "rimuru-dev",
-    "targetPoint": "rimuru-dev",
+    "point": "watame-tco-dev",
+    "targetPoint": "watame-tco-dev",
     "lastLocation": {
-      "x": 347,
-      "y": 71,
-      "z": -1169
+      "x": -642,
+      "y": 75,
+      "z": -891
     },
-    "offset": 0.06735217571258,
+    "offset": 0.3192695975303,
     "energy": 1,
     "path": [],
     "status": 0

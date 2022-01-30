@@ -3,14 +3,7 @@ import Sketch from "react-p5";
 import Cookies from 'js-cookie'
 import config from "../config";
 import droneImg from "../assets/done.png"
-function getOffset(el) {
-    const rect = el.getBoundingClientRect();
-    return {
-        x: rect.left + window.scrollX,
-        y: rect.top + window.scrollY
-
-    };
-}
+import { Button, Form, InputGroup, Ratio } from "react-bootstrap";
 
 export const vector = {
     add: (a, b) => {
@@ -49,8 +42,9 @@ export const vector = {
 }
 
 export default class Map extends React.Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
+
         this.center = { x: 0, z: 0 };
         this.s = 1;
         this.picSize = 512;
@@ -137,14 +131,9 @@ export default class Map extends React.Component {
         this.updateSize();
         var cnv = this.p5.createCanvas(this.w, this.h).parent(parent_);
 
-        // Add UI
-
-
-        var button = p5_.createButton("Reset position")
-        button.mousePressed(this.resetPosition);
-
         //Register events:
         cnv.mouseWheel((e) => {
+            e.preventDefault();
             if (e.wheelDelta < 0)
                 this.s *= .95;
             else
@@ -167,8 +156,6 @@ export default class Map extends React.Component {
 
         new ResizeObserver(() => {
             this.updateSize()
-            const rect = getOffset(this.parent)
-            button.position(rect.x + this.w - button.width, rect.y)
         }).observe(parent_)
 
     };
@@ -216,20 +203,34 @@ export default class Map extends React.Component {
 
     draw = (p5) => this.drawMap(p5);
 
+
     render = () => {
-        return <Sketch setup={this.setup} draw={this.draw} className="w-100 h-100" />;
+        return <Ratio aspectRatio="4x3" className="border border-5 rounded rounded-3">
+            <Sketch setup={this.setup} draw={this.draw} className="w-100 h-100" />
+        </Ratio>;
     }
 };
 
+
+
+/**
+ * Done Map
+ * 
+ * A map that inclued drones and drone paths 
+ */
 export class DroneMap extends Map {
 
     constructor(props) {
         super(props)
         this.show = props.show;
         if (this.show === undefined) this.show = "address"
+        this.showMap = {
+            "Mail Adresses": "address",
+            "All": "all",
+            "None": "none"
+        };
         this.data = {}
-        this.updateData();
-        setInterval(() => this.updateData(), 1000);
+        this.state = { drones: [], map: {} }
     }
 
     setup = async (p5_, parent_) => {
@@ -237,31 +238,41 @@ export class DroneMap extends Map {
         this.droneImg = p5_.loadImage(droneImg)
     }
 
-    async updateData() {
-        var data = this.data
-        fetch(`${config.apiURL}/map`)
-            .then(res => res.json())
-            .then(out => {
-                data.map = out;
-                const lines = [];
-                for (let aName in out) {
-                    const a = out[aName];
-                    for (let bName in a.connected) {
-                        const filtered = lines.filter(a => a[0] === aName && a[1] === bName)
-                        if (filtered.length === 0)
-                            lines.push([bName, aName])
-                    }
-                }
-                data.lines = lines
-            })
-            .catch(err => console.log(err));
+    componentDidMount = () => {
+        this.interval = setInterval(() => this.updateData(), 1000);
+    }
 
-        fetch(`${config.apiURL}/drones`)
-            .then(res => res.json())
-            .then(out => {
-                data.drones = out;
-            })
-            .catch(err => console.log(err));
+    componentWillUnmount = () => {
+        clearInterval(this.interval)
+    }
+
+    async updateData() {
+        try {
+            const data = this.data;
+            data.map = await (await fetch(`${config.apiURL}/map`)).json();
+            const lines = [];
+            for (let aName in data.map) {
+                const a = data.map[aName];
+                for (let bName in a.connected) {
+                    const filtered = lines.filter(a => a[0] === aName && a[1] === bName)
+                    if (filtered.length === 0)
+                        lines.push([bName, aName])
+                }
+            }
+            data.lines = lines
+
+            data.drones = await (await fetch(`${config.apiURL}/drones`)).json()
+            for (let k in data.drones) data.drones[k].uuid = k
+
+            const state = this.state
+            const droneArray = Object.values(data.drones).filter(v => v.connected).sort((a, b) => a.targetPoint.localeCompare(b.targetPoint));
+            state.drones = droneArray
+            state.map = data.map;
+
+            this.setState(state)
+        } catch (e) {
+            console.log(e);
+        }
     }
 
 
@@ -332,5 +343,40 @@ export class DroneMap extends Map {
             p5.imageMode(p5.CENTER);
             p5.image(this.droneImg, dPos.x, dPos.z, 15 * s, 15 * s)
         }
+    }
+
+    handleChangeShow = (e) => {
+        this.show = this.showMap[e.target.value]
+        console.log(this.show);
+
+    }
+
+    render = () => {
+        return <div>
+            <Ratio aspectRatio="4x3" className="border border-5 rounded rounded-3">
+                <Sketch setup={this.setup} draw={this.draw} className="w-100 h-100" />
+            </Ratio>
+
+            <InputGroup className="mt-3">
+                <InputGroup.Text>Point names:</InputGroup.Text>
+                <Form.Control as="select" onChange={this.handleChangeShow}>
+                    {Object.keys(this.showMap).map(k => <option key={k}>{k}</option>)}
+                </Form.Control>
+                <Button onClick={this.resetPosition}>Reset Positon</Button>
+            </InputGroup>
+            <InputGroup className="mt-3">
+                <InputGroup.Text>Drone:</InputGroup.Text>
+                <Form.Control as="select">
+                    {this.state.drones.map(v => <option key={v.uuid} value={v.uuid}>{v.uuid} | {v.targetPoint}</option>)}
+                </Form.Control>
+                <InputGroup.Text>{this.state.drones.length} connected.</InputGroup.Text>
+            </InputGroup>
+            <InputGroup className="mt-3">
+                <InputGroup.Text>Target:</InputGroup.Text>
+                <Form.Control as="select">
+                    {Object.keys(this.state.map).map(k => <option key={k}>{k}</option>)}
+                </Form.Control>
+            </InputGroup>
+        </div>;
     }
 }

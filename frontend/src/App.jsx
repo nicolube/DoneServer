@@ -1,21 +1,34 @@
 import React from 'react';
 import Map, { DroneMap } from "./components/maps";
-import { Container, Ratio } from "react-bootstrap"
+import {  Container } from "react-bootstrap"
 import { GitHubFiles } from './components/test';
+
+import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import Messages from './api/aleart';
+import Header from './components/header';
 
 
 function App() {
   return (
     <div className="App">
-      <header className="header">
-      </header>
-      Hallo Welt
-      <Container className="w-100 h-100" >
-        <Ratio aspectRatio="4x3">
-          <DroneMap />
-        </Ratio>
-        <GitHubFiles className="mx-auto" />
-      </Container>
+
+      <React.StrictMode>
+        <BrowserRouter>
+          <Header />
+          <Container className="w-100 h-100" >
+            <Messages />
+            <div className="mt-3"/>
+            <Routes>
+              <Route path="/" element={
+                <Map/>} />
+              <Route path="/drones" element={
+                <DroneMap />} />
+              <Route path="/explorer" element={<GitHubFiles className="mt-2"/>} />
+            </Routes>
+          </Container>
+
+        </BrowserRouter>
+      </React.StrictMode>
     </div>
   );
 }
