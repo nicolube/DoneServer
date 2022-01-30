@@ -99,7 +99,6 @@ const port = 8080;
 server.listen(port, function () {
     console.log(`Server listening for connection requests on socket localhost:${port}.`);
 });
-
 server.on('connection', function (socket) {
     console.log('A new connection has been established.');
     socket.write(`return "$UUID:"..modemAddr\n`)
@@ -159,7 +158,6 @@ server.on('connection', function (socket) {
         console.log(`Error (${uuid}): ${err}`);
     });
 });
-
 
 var sel = ""
 
