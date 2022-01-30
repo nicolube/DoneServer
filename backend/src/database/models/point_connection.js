@@ -1,4 +1,4 @@
-var pointConnectionCollection = Waterline.Collection.extend({
+export var pointConnectionCollection = Waterline.Collection.extend({
   identity: 'point_connection',
   datastore: 'default',
   primaryKey: 'id',

@@ -1,4 +1,4 @@
-var droneCollection = Waterline.Collection.extend({
+export var droneCollection = Waterline.Collection.extend({
     identity: 'point_connection',
     datastore: 'default',
     primaryKey: 'uuid',
