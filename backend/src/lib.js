@@ -1,5 +1,6 @@
 import path from "path"
 import fs from "fs"
+import * as db from "./database/database"
 
 const dataFolder = "data";
 
@@ -72,3 +73,12 @@ export const calcDronePosition = (mapData, drone) => {
     vector.round(pos)
     return pos
 }
+
+
+export const authenticateDevice = (secred, uuid) => {
+  db.SecredCollection.find()
+};
+
+export const authenticateUser = (username, password) => {
+  
+};
