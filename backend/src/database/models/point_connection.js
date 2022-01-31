@@ -1,3 +1,5 @@
+import Waterline from "waterline";
+
 export var pointConnectionCollection = Waterline.Collection.extend({
   identity: 'point_connection',
   datastore: 'default',

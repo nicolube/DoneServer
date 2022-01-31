@@ -1,5 +1,7 @@
+import Waterline from "waterline";
+
 export var droneCollection = Waterline.Collection.extend({
-    identity: 'point_connection',
+    identity: 'drone',
     datastore: 'default',
     primaryKey: 'uuid',
   
@@ -10,7 +12,7 @@ export var droneCollection = Waterline.Collection.extend({
       target_point: { model: 'point'},
       point: { model: 'point'},
       position: { model: 'position' },
-      connected: { type: "boolean", required: true, defaultsTo: false},
-      status: { type: "number", required: true, defaultsTo: 0}
+      connected: { type: "boolean",  defaultsTo: false},
+      status: { type: "number", defaultsTo: 0}
     }
   });

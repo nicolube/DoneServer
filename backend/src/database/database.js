@@ -1,10 +1,11 @@
 import Waterline from 'waterline';
-import sailsDiskAdapter from "sails-disk"
-    ;
-import { pointCollection } from './models/point';
-import { droneCollection } from './models/drone';
-import { pointConnectionCollection } from './models/point_connection';
-import { positionCollection } from './models/position';
+import sailsDiskAdapter from "sails-disk";
+import pointCollection from './models/point.js';
+import { droneCollection } from './models/drone.js';
+import { pointConnectionCollection } from './models/point_connection.js';
+import { positionCollection } from './models/position.js';
+import { secredCollection } from './models/secred.js';
+import { userCollection } from './models/user.js';
 
 
 var waterline = new Waterline();
@@ -21,14 +22,36 @@ var config = {
     }
 };
 
-waterline.registerModel(pointCollection)
-waterline.registerModel(pointConnectionCollection)
-waterline.registerModel(positionCollection)
-waterline.registerModel(droneCollection)
+waterline.registerModel(secredCollection);
+waterline.registerModel(userCollection);
+
+waterline.registerModel(pointCollection);
+waterline.registerModel(pointConnectionCollection);
+waterline.registerModel(positionCollection);
+waterline.registerModel(droneCollection);
+
+
+export var SecredCollection = null;
+export var UserCollection = null;
+
+export var PointCollection = null;
+export var PointConnectionCollection = null;
+export var PositionCollection = null;
+export var DroneCollection = null;
 
 waterline.initialize(config, (err, ontology) => {
     if (err) {
-        console.error(err);
-        return;
+        console.error(`Failed to connect to datebase: ${err}`);
+        return
     }
+    console.error(`Database connected.`);
+
+    SecredCollection = ontology.collections.secred;
+    UserCollection = ontology.collections.user;
+
+    PointCollection = ontology.collections.point;
+    PointConnectionCollection = ontology.collections.point_connection
+    PositionCollection = ontology.collections.position;
+    DroneCollection = ontology.collections.drone;
 });
+

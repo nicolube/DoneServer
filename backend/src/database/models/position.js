@@ -1,3 +1,5 @@
+import Waterline from "waterline";
+
 export var positionCollection = Waterline.Collection.extend({
     identity: 'position',
     datastore: 'default',

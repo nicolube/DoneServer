@@ -1,4 +1,7 @@
-export var pointCollection = Waterline.Collection.extend({
+import Waterline from "waterline";
+
+ 
+var pointCollection = Waterline.Collection.extend({
     identity: 'point',
     datastore: 'default',
     primaryKey: 'id',
@@ -19,3 +22,5 @@ export var pointCollection = Waterline.Collection.extend({
       }
     }
   });
+
+  export default pointCollection;
