@@ -302,7 +302,7 @@ export class DroneMap extends Map {
             p5.pop();
             // Move halfway again
             arclength += w * wm;
-        }list
+        }
     }
 
     draw = (p5) => {

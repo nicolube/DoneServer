@@ -5,16 +5,6 @@ import * as api from "./api.js";
 import { UserCollection } from "./database/database.js";
 var sel = ""
 
-
-setTimeout(async () => {
-    var user = await UserCollection.create({
-        username: 'DevMagic',
-        password: 'test',
-        uuid: 'test'
-      });
-      console.log(`User crated: ${user}`);
-}, 1000)
-
 const commands = {
 
 }

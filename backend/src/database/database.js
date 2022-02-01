@@ -6,6 +6,7 @@ import { pointConnectionCollection } from './models/point_connection.js';
 import { positionCollection } from './models/position.js';
 import { secredCollection } from './models/secred.js';
 import { userCollection } from './models/user.js';
+import * as argon2 from 'argon2';
 
 
 var waterline = new Waterline();
@@ -39,7 +40,7 @@ export var PointConnectionCollection = null;
 export var PositionCollection = null;
 export var DroneCollection = null;
 
-waterline.initialize(config, (err, ontology) => {
+waterline.initialize(config, async (err, ontology) => {
     if (err) {
         console.error(`Failed to connect to datebase: ${err}`);
         return
@@ -53,5 +54,12 @@ waterline.initialize(config, (err, ontology) => {
     PointConnectionCollection = ontology.collections.point_connection
     PositionCollection = ontology.collections.position;
     DroneCollection = ontology.collections.drone;
+
+    if (await UserCollection.count() === 0) {
+        await UserCollection.create({
+            username: "admin",
+            password: await argon2.hash("password123")
+        })
+    }
 });
 

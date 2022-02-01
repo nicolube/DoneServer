@@ -1,7 +1,7 @@
 import path from "path"
 import fs from "fs"
-import * as db from "./database/database"
-
+import * as db from "./database/database.js"
+import * as argon2 from "argon2"
 const dataFolder = "data";
 
 export const loadDoneFile = () => {
@@ -75,10 +75,27 @@ export const calcDronePosition = (mapData, drone) => {
 }
 
 
-export const authenticateDevice = (secred, uuid) => {
-  db.SecredCollection.find()
+export const authenticateDevice = async (secred, uuid) => {
+  const data = await db.SecredCollection.findOne({    
+    uuid: uuid
+  });
+  if (data === null) return null;
+  if (argon2.verify(data.secred, secred)) return null;
+  return data.type;
 };
 
-export const authenticateUser = (username, password) => {
-  
+export const authenticateUser = async (username, password) => {
+    const user = await db.UserCollection.findOne({username: username})
+    if (user === undefined) return false;
+    return await argon2.verify(user.password, password);
 };
+
+export const registerDrone = async (uuid, secred, position) => {
+  await db.DroneCollection.create({
+      uuid: uuid,
+      secred: secred,
+
+      
+  })
+};
+

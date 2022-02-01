@@ -1,5 +1,6 @@
 import fs from "fs"
 import Net from "net"
+import { authenticateDevice, authenticateUser } from "./lib";
 
 const drones = []
 
@@ -13,12 +14,21 @@ server.listen(port, function () {
 server.on('connection', function (socket) {
     console.log('A new connection has been established, request auth data');
 
-    socket.on('data', function (chunk) {
+    socket.on('data', async (chunk) => {
         var data = chunk.toString()
         if (data.match(/^<\w{32}\/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}>$/g).length == 1) {
             var data = data.slice(1, -1).split("/");
             const secred = data[0];
             const uuid = data[1];
+            const type = await authenticateDevice(secred, uuid);
+            if (type === null) {
+                console.log(`An unkowen unauthenticated device tried to connect (UUID: ${uuid})!`);
+                socket.destroy();
+            }
+            if (type === "drone") {
+                // TODO: Load data from database
+                drones.push(new Drone(_, socket))
+            }
         } else {
             socket.destroy();
         }

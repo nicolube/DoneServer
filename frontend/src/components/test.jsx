@@ -2,7 +2,7 @@
 import React from 'react';
 import { Component } from 'react';
 import FileBrowser, {Icons} from 'react-keyed-file-browser'
-import {BsFileImage, BsFolderMinus, BsFolderPlus, BsImage} from 'react-icons/bs';
+import {BsFileImage, BsFolderMinus, BsFolderPlus} from 'react-icons/bs';
 import { addMessage, MessageTypes } from '../api/aleart';
 ;
 

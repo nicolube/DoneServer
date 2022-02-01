@@ -11,6 +11,7 @@ export var secredCollection = Waterline.Collection.extend({
           autoMigrations: {autoIncrement: true}
       },
       secred: {type:'string', required: true},
+      uuid: {type:'string', required: true},
       type: {type:'string', required: true},
       
     }
