@@ -1,18 +1,33 @@
-import React from 'react';
-import { Container, Nav } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Button, Container, Nav } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
+import * as api from '../api/api';
 
-const NavLink = ({to, children}) => {
-    var active = false
+
+const NavLink = ({ to, children }) => {
+    var variant = "secondary"
+    const navigator = useNavigate()
     const location = useLocation();
+
+    const handleClick = () => {
+        navigator(to);
+    };
+
     if (to === location.pathname)
-        active = true
+        variant = "primary"
     return (
-        <Nav.Link active={active} as={Link} to={to}>{children}</Nav.Link>
+        <Button className="mx-2" variant={variant} onClick={handleClick}>{children}</Button>
     )
 }
 
 const Header = () => {
+    const [login, setLogin] = useState(false)
+    useEffect(() => {
+        const inverval = setInterval(() => setLogin(api.settings.login), 100);
+        return () => clearInterval(inverval);
+    });
+
+
     return (
         <header className="d-flex bg-dark text-white">
             <Container className="d-flex flex-wrap justify-content-center py-3 mb-4 align-items-center ">
@@ -20,7 +35,9 @@ const Header = () => {
                     <span className="fs-4">TempestCo</span>
                 </div>
                 <Nav variant="pills">
-                    <NavLink  to="/" active="true">Home</NavLink>
+                    <NavLink to="/" active="true">Home</NavLink>
+                    {!login ? <NavLink to="/login" active="true">Login</NavLink> :
+                    <Button className="mx-2" onClick={api.logout}>Logout</Button>}
                 </Nav>
             </Container>
         </header>
