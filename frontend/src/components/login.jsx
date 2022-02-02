@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Form, Button, Row, Col } from 'react-bootstrap';
+import { Container, Form, Button } from 'react-bootstrap';
 import { isMobile } from 'react-device-detect';
 import { useNavigate } from 'react-router';
 import * as api from '../api/api';
