@@ -53,7 +53,7 @@ const Header = () => {
             <Navbar bg="dark" variant="dark" expand={isMobile ? "lg": true}>
                 <Container>
                     <Navbar.Brand>
-                        TempestCo {isMobile ? "Yes" : "no"}
+                        TempestCo
                     </Navbar.Brand>
                     {isMobile ? <>
 
