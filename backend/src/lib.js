@@ -85,6 +85,7 @@ export const authenticateDevice = async (secred, uuid) => {
 };
 
 export const authenticateUser = async (username, password) => {
+    console.log(username);
     const user = await db.UserCollection.findOne({username: username})
     if (user === undefined) return false;
     return await argon2.verify(user.password, password);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Nav } from 'react-bootstrap';
+import { Button, Container, Image, Nav, Ratio } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as api from '../api/api';
 
@@ -37,7 +37,12 @@ const Header = () => {
                 <Nav variant="pills">
                     <NavLink to="/" active="true">Home</NavLink>
                     {!login ? <NavLink to="/login" active="true">Login</NavLink> :
-                    <Button className="mx-2" onClick={api.logout}>Logout</Button>}
+                        <>
+                            <div className="mx-2">
+                                <Image fluid={true} roundedCircle={true} src={`https://cravatar.eu/helmavatar/${api.settings.username}/38.png`} />
+                            </div>
+                            <Button className="mx-2" onClick={api.logout}>Logout</Button>
+                        </>}
                 </Nav>
             </Container>
         </header>
