@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Image, Nav, Ratio } from 'react-bootstrap';
+import { Container, Image, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { isMobile } from "react-device-detect";
 import * as api from '../api/api';
 
 
 const NavLink = ({ to, children }) => {
-    var variant = "secondary"
+    var active = false
     const navigator = useNavigate()
     const location = useLocation();
 
@@ -14,37 +15,61 @@ const NavLink = ({ to, children }) => {
     };
 
     if (to === location.pathname)
-        variant = "primary"
+        active = true
     return (
-        <Button className="mx-2" variant={variant} onClick={handleClick}>{children}</Button>
+        <Nav.Link className="mx-2" active={active} onClick={handleClick}>{children}</Nav.Link>
     )
 }
-
-const Header = () => {
+const NavItems = () => {
     const [login, setLogin] = useState(false)
     useEffect(() => {
         const inverval = setInterval(() => setLogin(api.settings.login), 100);
         return () => clearInterval(inverval);
     });
 
+    return <>
+        <NavLink to="/" active="true">Home</NavLink>
+        {
+            !login ? <NavLink to="/login" active="true">Login</NavLink> :
+                <>
+                    <NavDropdown className="mx-2" title={
+                        <>
+                            <Image roundedCircle="true h-100" className="thumbnail-image me-2" src={`https://cravatar.eu/helmavatar/${api.settings.username}/28.png`} />
+                            {api.settings.username}
+                        </>
+                    }>
+                        <NavDropdown.Item onClick={api.logout}>Logout</NavDropdown.Item>
+                    </NavDropdown>
+                </>
+        };
+    </>
+};
+
+
+const Header = () => {
 
     return (
-        <header className="d-flex bg-dark text-white">
-            <Container className="d-flex flex-wrap justify-content-center py-3 mb-4 align-items-center ">
-                <div className="d-flex mb-lg-0 mb-3 mb-md-1 me-md-auto text-decoration-none">
-                    <span className="fs-4">TempestCo</span>
-                </div>
-                <Nav variant="pills">
-                    <NavLink to="/" active="true">Home</NavLink>
-                    {!login ? <NavLink to="/login" active="true">Login</NavLink> :
-                        <>
-                            <div className="mx-2">
-                                <Image fluid={true} roundedCircle={true} src={`https://cravatar.eu/helmavatar/${api.settings.username}/38.png`} />
-                            </div>
-                            <Button className="mx-2" onClick={api.logout}>Logout</Button>
-                        </>}
-                </Nav>
-            </Container>
+        <header>
+            <Navbar bg="dark" variant="dark" expand={isMobile ? "lg": true}>
+                <Container>
+                    <Navbar.Brand>
+                        TempestCo {isMobile ? "Yes" : "no"}
+                    </Navbar.Brand>
+                    {isMobile ? <>
+
+                        <Navbar.Toggle aria-controls="navbar-nav" />
+                        <Navbar.Collapse id="navbar-nav" >
+                                <Nav>
+                                    <NavItems />
+                                </Nav>
+                            </Navbar.Collapse>
+
+                    </> :
+                        <Nav variant="pills">
+                            <NavItems />
+                        </Nav>}
+                </Container>
+            </Navbar>
         </header>
     )
 }
