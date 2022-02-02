@@ -100,16 +100,20 @@ export default class Map extends React.Component {
         const p5 = this.p5;
         const s = this.s
         this.mousePos = { x: p5.mouseX / s, z: p5.mouseY / s }
-        if (this.reset) {
-            this.reset = false
-            this.startMousePos = this.mousePos
-            this.smPos = this.mousePos;
-        }
         if (p5.mouseIsPressed) {
-            if (e.type === "touchmove")
-                this.mPos = vector.add(this.smPos, vector.subtract(this.startMousePos, this.mousePos))
-            else
-                this.mPos = vector.subtract(this.mPos, { x: e.movementX / s, z: e.movementY / s })
+            this.mPos = vector.subtract(this.mPos, { x: e.movementX / s, z: e.movementY / s })
+            this.saveCookies()
+        }
+        return false
+    }
+
+    handleMoveTouch = (e) => {
+        e.preventDefault()
+        const p5 = this.p5;
+        const s = this.s
+        this.mousePos = { x: e.touches[0].pageX / s, z: e.touches[0].pageY / s }
+        if (p5.mouseIsPressed) {
+            this.mPos = vector.add(this.smPos, vector.subtract(this.startMousePos, this.mousePos));
             this.saveCookies()
         }
         return false
@@ -147,11 +151,12 @@ export default class Map extends React.Component {
         this.parent.addEventListener('contextmenu', event => {
             event.preventDefault()
         });
-
+        this.reset = true
         cnv.mouseMoved((e) => this.handleMove(e))
-        cnv.touchMoved((e) => this.handleMove(e))
-        cnv.touchEnded((e) => {
-            this.reset = true;
+        cnv.touchMoved((e) => this.handleMoveTouch(e))
+        parent_.addEventListener('touchstart', (e) => {
+            this.startMousePos = { x: e.touches[0].pageX / this.s, z: e.touches[0].pageY / this.s };
+            this.smPos = this.mPos;
         });
 
         new ResizeObserver(() => {
